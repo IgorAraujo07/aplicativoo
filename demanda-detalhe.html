@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Detalhe da Demanda — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="logo-wc.svg">
+</head>
+<body data-page="demandas">
+  <div class="topbar">
+    <div class="searchbar">
+      <button class="btn ghost" data-toggle="sidebar">☰</button>
+      <strong id="page-title">Detalhe da Demanda</strong>
+    </div>
+    <div class="actions"><a class="btn ghost" href="demandas.html">Voltar</a></div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="logo-wc.svg" class="logo-img" alt="Logo WebCidadão">
+        WebCidadão<br><small>Administração</small>
+      </div>
+      <a href="admin.html">Painel Inicial</a>
+      <a class="active" href="demandas.html">Demandas</a>
+      <a href="agendamentos-cidadao.html">Agendamentos (Cidadão)</a>
+      <a href="relatorios.html">Relatórios</a>
+      <a href="login.html">Sair</a>
+    </aside>
+
+    <main class="main">
+      <div class="grid grid-2">
+        <div class="card"><div class="card-body">
+          <h3>Resumo</h3>
+          <p><strong>Protocolo:</strong> <span id="dm-protocolo">—</span></p>
+          <p><strong>Título:</strong> <span id="dm-titulo">—</span></p>
+          <p><strong>Categoria:</strong> <span id="dm-categoria">—</span></p>
+          <p><strong>Prioridade:</strong> <span id="dm-prioridade">—</span></p>
+          <p><strong>Status:</strong> <span id="dm-status" class="badge">—</span></p>
+        </div></div>
+
+        <div class="card"><div class="card-body">
+          <h3>Ações</h3>
+          <div class="actions">
+            <button class="btn" id="btn-assumir">Assumir</button>
+            <button class="btn secondary" id="btn-encaminhar">Encaminhar</button>
+            <button class="btn ghost" id="btn-concluir">Concluir</button>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card"><div class="card-body">
+          <h3>Descrição</h3>
+          <p id="dm-descricao">—</p>
+        </div></div>
+
+        <div class="card"><div class="card-body">
+          <h3>Histórico</h3>
+          <ul id="dm-historico">
+            <!-- itens adicionados via JS -->
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="card" id="dm-notfound" style="display:none;">
+        <div class="card-body">
+          <strong>Demanda não encontrada.</strong>
+          <p>Verifique o link ou retorne à <a href="demandas.html">Fila de Demandas</a>.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Util: pega parâmetro da URL
+    function getParam(name) {
+      const u = new URL(location.href);
+      return u.searchParams.get(name);
+    }
+
+    // Procura uma demanda pelo id/protocolo no localStorage
+    function findDemandaById(idBuscado) {
+      if (!idBuscado) return null;
+      const idStr = String(idBuscado);
+
+      // 1) Tenta no agregado "wc.demands.all"
+      const allRaw = localStorage.getItem('wc.demands.all');
+      if (allRaw) {
+        try {
+          const arr = JSON.parse(allRaw) || [];
+          const hit = arr.find(d => {
+            const cand = String(d.id ?? d.protocolo ?? d.numero ?? '');
+            return cand === idStr;
+          });
+          if (hit) return hit;
+        } catch {}
+      }
+
+      // 2) Varrendo chaves por-usuário (ex: wc.demands.usuario@dominio)
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (k.startsWith('wc.demands.')) {
+          try {
+            const arr = JSON.parse(localStorage.getItem(k) || '[]');
+            if (Array.isArray(arr)) {
+              const hit = arr.find(d => {
+                const cand = String(d.id ?? d.protocolo ?? d.numero ?? '');
+                return cand === idStr;
+              });
+              if (hit) return hit;
+            }
+          } catch {}
+        }
+      }
+      return null;
+    }
+
+    // Badge por status
+    function setStatusBadge(el, status) {
+      const txt = (status || '').toString();
+      el.textContent = txt || '—';
+      el.classList.remove('warning','success','info','danger');
+      const s = txt.toLowerCase();
+      if (s.includes('abert')) el.classList.add('warning');
+      else if (s.includes('andamento') || s.includes('assum')) el.classList.add('info');
+      else if (s.includes('conclu')) el.classList.add('success');
+      else el.classList.add('warning');
+    }
+
+    // Monta histórico
+    function renderHistorico(listEl, historico) {
+      listEl.innerHTML = '';
+      if (!Array.isArray(historico) || !historico.length) {
+        const li = document.createElement('li');
+        li.textContent = 'Sem registros no histórico.';
+        listEl.appendChild(li);
+        return;
+      }
+      historico.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = typeof item === 'string' ? item : (item.texto || item.evento || JSON.stringify(item));
+        listEl.appendChild(li);
+      });
+    }
+
+    // Preenche a UI com a demanda
+    (function init() {
+      const id = getParam('id'); // vem do link "Abrir"
+      const dm = findDemandaById(id);
+
+      const notfound = document.getElementById('dm-notfound');
+      const pageTitle = document.getElementById('page-title');
+
+      if (!dm) {
+        notfound.style.display = '';
+        pageTitle.textContent = 'Demanda não encontrada';
+        return;
+      }
+
+      const protocolo = String(dm.protocolo ?? dm.id ?? dm.numero ?? '—');
+      pageTitle.textContent = `Detalhe da Demanda #${protocolo}`;
+
+      // Campos
+      document.getElementById('dm-protocolo').textContent = protocolo;
+      document.getElementById('dm-titulo').textContent = dm.titulo || dm.title || '—';
+      document.getElementById('dm-categoria').textContent = dm.categoria || dm.category || '—';
+      document.getElementById('dm-prioridade').textContent = dm.prioridade || dm.priority || '—';
+      document.getElementById('dm-descricao').textContent = dm.descricao || dm.description || '—';
+      setStatusBadge(document.getElementById('dm-status'), dm.status || 'Aberta');
+
+      // Histórico: aceita array de strings ou objetos {texto: "..."}
+      renderHistorico(document.getElementById('dm-historico'), dm.historico || dm.history || []);
+
+      // Ações básicas alterando status no storage (opcional)
+      function salvarDemandaAtualizada(nova) {
+        // Atualiza em wc.demands.all se existir
+        const allRaw = localStorage.getItem('wc.demands.all');
+        if (allRaw) {
+          try {
+            const arr = JSON.parse(allRaw) || [];
+            const idx = arr.findIndex(d => String(d.protocolo ?? d.id ?? d.numero) === protocolo);
+            if (idx >= 0) { arr[idx] = nova; localStorage.setItem('wc.demands.all', JSON.stringify(arr)); }
+          } catch {}
+        }
+        // Atualiza também onde foi encontrada originalmente (varre)
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('wc.demands.')) {
+            try {
+              const arr = JSON.parse(localStorage.getItem(k) || '[]');
+              if (Array.isArray(arr)) {
+                const idx = arr.findIndex(d => String(d.protocolo ?? d.id ?? d.numero) === protocolo);
+                if (idx >= 0) { arr[idx] = nova; localStorage.setItem(k, JSON.stringify(arr)); }
+              }
+            } catch {}
+          }
+        }
+      }
+
+      document.getElementById('btn-assumir')?.addEventListener('click', () => {
+        dm.status = 'Em andamento';
+        (dm.historico ||= []).push('Responsável assumiu a demanda');
+        setStatusBadge(document.getElementById('dm-status'), dm.status);
+        renderHistorico(document.getElementById('dm-historico'), dm.historico);
+        salvarDemandaAtualizada(dm);
+        alert('Demanda assumida.');
+      });
+
+      document.getElementById('btn-encaminhar')?.addEventListener('click', () => {
+        (dm.historico ||= []).push('Demanda encaminhada ao setor competente');
+        renderHistorico(document.getElementById('dm-historico'), dm.historico);
+        salvarDemandaAtualizada(dm);
+        alert('Demanda encaminhada.');
+      });
+
+      document.getElementById('btn-concluir')?.addEventListener('click', () => {
+        dm.status = 'Concluída';
+        (dm.historico ||= []).push('Demanda concluída');
+        setStatusBadge(document.getElementById('dm-status'), dm.status);
+        renderHistorico(document.getElementById('dm-historico'), dm.historico);
+        salvarDemandaAtualizada(dm);
+        alert('Demanda concluída.');
+      });
+    })();
+  </script>
+
+  <script src="app.js"></script>
+</body>
+</html>

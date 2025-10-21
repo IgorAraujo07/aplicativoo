@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demandas — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="logo-wc.svg">
+</head>
+<body data-page="demandas">
+  <div class="topbar">
+    <div class="searchbar">
+      
+      <strong>Demandas</strong>
+    </div>
+    <div class="actions">
+      <a class="btn" href="demanda-recebimento.html">Receber Demanda</a>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="logo-wc.svg" class="logo-img">
+        WebCidadão<br><small>Administração</small>
+      </div>
+      <a href="admin.html">Painel Inicial</a>
+      <a class="active" href="demandas.html">Demandas</a>
+      
+      
+
+
+      <!-- Indicadores substituído -->
+      <a href="admin.html#agendamentos-cidadao">Agendamentos (Cidadão)</a>
+      <a href="relatorios.html">Relatórios</a>
+      <a href="login.html">Sair</a>
+    </aside>
+
+    <main class="main">
+      <div class="card"><div class="card-body">
+        <h3>Fila de Demandas</h3>
+        <div class="grid grid-4">
+          <input class="input" placeholder="Buscar..." data-table-filter="#tb-fila">
+          <select class="input">
+            <option>Todos status</option>
+            <option>Aberta</option>
+            <option>Em andamento</option>
+            <option>Concluída</option>
+          </select>
+          <select class="input">
+            <option>Todas categorias</option>
+            <option>Infraestrutura</option>
+            <option>Saúde</option>
+            <option>Educação</option>
+            <option>Transporte</option>
+            <option>Segurança</option>
+            <option>Obras</option>
+    
+          </select>
+          <a class="btn ghost" href="demanda-recebimento.html">+ Nova Demanda</a>
+        </div>
+
+        <table class="table" id="tb-fila">
+          <thead>
+            <tr>
+              <th>Protocolo</th>
+              <th>Título</th>
+              <th>Categoria</th>
+              <th>Prioridade</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>4321</td>
+              <td>Iluminação pública queimada</td>
+              <td>Infraestrutura</td>
+              <td><span class="badge danger">Alta</span></td>
+              <td><span class="badge warning">Aberta</span></td>
+              <td class="actions"><a class="btn ghost" href="demanda-detalhe.html">Abrir</a></td>
+            </tr>
+            <tr>
+              <td>4318</td>
+              <td>Falta de medicamentos</td>
+              <td>Saúde</td>
+              <td><span class="badge warning">Média</span></td>
+              <td><span class="badge info">Em andamento</span></td>
+              <td class="actions"><a class="btn ghost" href="demanda-detalhe.html">Abrir</a></td>
+            </tr>
+            <tr>
+              <td>4311</td>
+              <td>Buraco em via principal</td>
+              <td>Obras</td>
+              <td><span class="badge">Baixa</span></td>
+              <td><span class="badge success">Concluída</span></td>
+              <td class="actions"><a class="btn ghost" href="demanda-detalhe.html">Abrir</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div></div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="bridge-demanda.js"></script>
+</body>
+</html>

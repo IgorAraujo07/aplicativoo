@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relatórios — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="logo-wc.svg" />
+  <style>
+    /* ajustes leves específicos da página de relatórios (não conflita com seu styles.css) */
+    .filters{display:grid;gap:12px;grid-template-columns:repeat(6,minmax(120px,1fr))}
+    .filters .wide{grid-column:span 2}
+    .filters .full{grid-column:1 / -1}
+    .kpis{display:grid;gap:12px;grid-template-columns:repeat(4,minmax(120px,1fr))}
+    .kpi{background:#fff;border-radius:var(--radius,16px);box-shadow:var(--shadow,0 6px 20px rgba(0,0,0,.08));padding:14px}
+    .kpi strong{display:block;font-size:1.25rem}
+    .table-wrap{overflow:auto;border-radius:var(--radius,16px);box-shadow:var(--shadow,0 6px 20px rgba(0,0,0,.08))}
+    table.report{width:100%;border-collapse:collapse;background:#fff}
+    table.report th, table.report td{padding:10px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
+    table.report th{white-space:nowrap}
+    .muted{color:var(--muted,#6b7280)}
+    .actions .btn{margin-right:8px}
+    @media (max-width:900px){
+      .filters{grid-template-columns:repeat(2,minmax(120px,1fr))}
+      .kpis{grid-template-columns:repeat(2,minmax(120px,1fr))}
+    }
+  </style>
+</head>
+<body data-page="relatorios">
+  <div class="topbar">
+    <div class="searchbar">
+      <strong>Relatórios</strong>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="logo-wc.svg" class="logo-img" alt="WC">
+        WebCidadão<br><small>Administração</small>
+      </div>
+      <a href="admin.html">Painel Inicial</a>
+      <a href="demandas.html">Demandas</a>
+      <a href="admin.html#agendamentos-cidadao">Agendamentos (Cidadão)</a>
+      <a class="active" href="relatorios.html">Relatórios</a>
+      <a href="login.html">Sair</a>
+    </aside>
+
+    <main class="main">
+      <!-- Filtros -->
+      <div class="card">
+        <div class="card-body">
+          <h3>Filtros</h3>
+          <div class="filters">
+            <div>
+              <label class="small muted">De</label>
+              <input id="fDataDe" type="date" class="input" />
+            </div>
+            <div>
+              <label class="small muted">Até</label>
+              <input id="fDataAte" type="date" class="input" />
+            </div>
+            <div>
+              <label class="small muted">Status</label>
+              <select id="fStatus" class="input">
+                <option value="">Todos</option>
+                <option value="Aberta">Aberta</option>
+                <option value="Em andamento">Em andamento</option>
+                <option value="Concluída">Concluída</option>
+                <option value="Arquivada">Arquivada</option>
+              </select>
+            </div>
+            <div>
+              <label class="small muted">Categoria</label>
+              <select id="fCategoria" class="input">
+                <option value="">Todas</option>
+                <option>Infraestrutura</option>
+                <option>Saúde</option>
+                <option>Educação</option>
+                <option>Segurança</option>
+                <option>Transporte</option>
+              </select>
+            </div>
+            <div class="wide">
+              <label class="small muted">Buscar texto</label>
+              <input id="fTexto" type="search" placeholder="título, resumo, endereço..." class="input" />
+            </div>
+            <div class="full" style="display:flex;gap:8px;align-items:end">
+              <button id="btnAplicar" class="btn">Aplicar</button>
+              <button id="btnLimpar" class="btn ghost">Limpar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpis" id="kpis"></div>
+
+      <!-- Tabela -->
+      <div class="card">
+        <div class="card-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+            <h3 style="margin:0">Demandas</h3>
+            <div class="actions">
+              <button id="btnCSV" class="btn">CSV</button>
+              <button id="btnPDF" class="btn secondary">PDF</button>
+              <button id="btnXLS" class="btn ghost">Planilha</button>
+            </div>
+          </div>
+          <p class="small muted" id="subtituloRel"></p>
+
+          <div class="table-wrap">
+            <table class="report" id="tblRel">
+              <thead>
+                <tr>
+                  <th>Protocolo</th>
+                  <th>Data</th>
+                  <th>Título</th>
+                  <th>Categoria</th>
+                  <th>Prioridade</th>
+                  <th>Status</th>
+                  <th>Autor</th>
+                  <th>Resumo</th>
+                </tr>
+              </thead>
+              <tbody><!-- preenchido via JS --></tbody>
+            </table>
+          </div>
+
+          <div id="vazio" class="muted" style="display:none;padding:14px">
+            Nenhuma demanda encontrada para os filtros informados.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

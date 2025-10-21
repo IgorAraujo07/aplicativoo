@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Área do Cidadão — WebCidadão" />
+  <title>Área do Cidadão — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="logo-wc.svg" />
+</head>
+<body data-page="cidadao">
+  <header class="topbar" role="banner">
+    <a href="home.html" class="brand" style="text-decoration:none;">
+      <img src="logo-wc.svg" alt="Logo WebCidadão" class="logo-img" />
+      <span>WebCidadão</span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="#painel">Painel</a>
+      <a href="#minhas-demandas">Minhas Demandas</a>
+      <a href="#nova-demanda" class="btn primary">Nova Demanda</a>
+      <a href="#agendamentos">Agendamentos</a>
+      <a href="#perfil">Perfil</a>
+      <a href="#notificacoes">Notificações</a>
+      <a href="login.html" class="btn outline">Sair</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="grid" style="grid-template-columns: 260px 1fr; gap: 24px;">
+      <aside class="sidebar" aria-label="Menu do Cidadão" style="position:sticky; top:16px; height:fit-content;">
+        <div class="logo" style="display:flex;align-items:center;gap:10px;">
+          <img src="logo-wc.svg" alt="WC" class="logo-img" style="width:28px;height:28px;" />
+          <div>
+            <strong>Área do Cidadão</strong><br />
+            <small id="cidadao-nome">Bem-vindo</small>
+          </div>
+        </div>
+        <a href="#painel" class="active">Painel</a>
+        <a href="#minhas-demandas">Minhas Demandas</a>
+        <a href="#nova-demanda">Nova Demanda</a>
+        <a href="#agendamentos">Agendamentos</a>
+        <a href="#perfil">Perfil</a>
+        <a href="#notificacoes">Notificações</a>
+        <a href="login.html">Sair</a>
+      </aside>
+
+      <main id="conteudo" tabindex="-1" role="main">
+        <!-- Painel -->
+        <section id="painel" class="card" data-section>
+          <div class="card-body">
+            <h1 style="margin-top:0;">Painel do Cidadão</h1>
+            <p class="muted">Aqui você acompanha suas demandas, agendamentos e notificações.</p>
+
+            <div class="grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
+              <div class="kpi card"><div class="card-body">
+                <div class="muted small">Demandas abertas</div>
+                <div id="kpi-abertas" class="h2">0</div>
+              </div></div>
+              <div class="kpi card"><div class="card-body">
+                <div class="muted small">Atendidas</div>
+                <div id="kpi-atendidas" class="h2">0</div>
+              </div></div>
+              <div class="kpi card"><div class="card-body">
+                <div class="muted small">Agendamentos</div>
+                <div id="kpi-agendamentos" class="h2">0</div>
+              </div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Minhas Demandas -->
+        <section id="minhas-demandas" class="card" data-section hidden>
+          <div class="card-body">
+            <h2 style="margin-top:0;">Minhas Demandas</h2>
+            <div id="lista-demandas" class="list"></div>
+          </div>
+        </section>
+
+        <!-- Nova Demanda -->
+        <section id="nova-demanda" class="card" data-section hidden>
+          <div class="card-body">
+            <h2 style="margin-top:0;">Abrir Nova Demanda</h2>
+            <form id="form-demanda" class="grid" style="grid-template-columns:1fr 1fr; gap:16px;">
+              <label class="input">
+                <span class="small muted">Título</span>
+                <input required name="titulo" placeholder="Ex.: Iluminação pública queimada" />
+              </label>
+              <label class="input">
+                <span class="small muted">Categoria</span>
+                <select name="categoria" required>
+                  <option value="">Selecione</option>
+                  <option>Iluminação</option>
+                  <option>Infraestrutura</option>
+                  <option>Saúde</option>
+                  <option>Educação</option>
+                  <option>Transporte</option>
+                  <option>Segurança</option>
+                  <option>Obras</option>
+                </select>
+              </label>
+              <label class="input" style="grid-column:1/-1;">
+                <span class="small muted">Descrição</span>
+                <textarea name="descricao" rows="4" placeholder="Explique o problema..."></textarea>
+              </label>
+              <div style="grid-column:1/-1;display:flex;gap:12px;justify-content:flex-end;">
+                <button type="reset" class="btn">Limpar</button>
+                <button class="btn primary">Enviar</button>
+                <input type="file" name="imagem" accept="image/*" />
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Agendamentos -->
+        <section id="agendamentos" class="card" data-section hidden>
+          <div class="card-body">
+            <h2 style="margin-top:0;">Agendamentos</h2>
+
+            <!-- IDs adicionados para integrar com o bridge e com o ADMIN -->
+            <form id="form-agendamento" class="grid"
+                  style="grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <label class="input">
+                <span class="small muted">Serviço</span>
+                <select id="ag-servico" name="servico" required>
+                  <option value="">Selecione</option>
+                  <option>Atendimento Social</option>
+                  <option>Saúde</option>
+                  <option>Educação</option>
+                  <option>Tributos</option>
+                  <option>Outros</option>
+                </select>
+              </label>
+
+              <label class="input">
+                <span class="small muted">Data</span>
+                <input id="ag-data" type="date" name="data" required />
+              </label>
+
+              <label class="input">
+                <span class="small muted">Horário</span>
+                <input id="ag-hora" type="time" name="hora" required />
+              </label>
+
+              <label class="input" style="grid-column:1/-1;">
+                <span class="small muted">Observações</span>
+                <textarea id="ag-obs" name="observacoes" rows="2" placeholder="Ex.: Atendimento preferencial..."></textarea>
+              </label>
+
+              <div style="grid-column:1/-1;display:flex;gap:12px;justify-content:flex-end;">
+                <button type="reset" class="btn outline" id="btn-limpar-ag">Limpar</button>
+                <button type="submit" class="btn primary">Agendar</button>
+              </div>
+            </form>
+
+            <div id="lista-agendamentos" class="list"></div>
+          </div>
+        </section>
+
+        <!-- Perfil -->
+        <section id="perfil" class="card" data-section hidden>
+          <div class="card-body">
+            <h2 style="margin-top:0;">Meu Perfil</h2>
+            <form id="form-perfil" class="grid" style="grid-template-columns:1fr 1fr; gap:16px;">
+              <label class="input">
+                <span class="small muted">Nome completo</span>
+                <input name="nome" placeholder="Seu nome" />
+              </label>
+              <label class="input">
+                <span class="small muted">CPF</span>
+                <input name="cpf" placeholder="000.000.000-00" />
+              </label>
+              <label class="input">
+                <span class="small muted">E-mail</span>
+                <input type="email" name="email" placeholder="voce@email.com" />
+              </label>
+              <label class="input">
+                <span class="small muted">Telefone</span>
+                <input name="telefone" placeholder="(00) 00000-0000" />
+              </label>
+              <div style="grid-column:1/-1;display:flex;gap:12px;justify-content:flex-end;">
+                <button class="btn primary">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Notificações -->
+        <section id="notificacoes" class="card" data-section hidden>
+          <div class="card-body">
+            <h2 style="margin-top:0;">Notificações</h2>
+            <div id="lista-notificacoes" class="list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Seus scripts existentes -->
+  <script src="cidadao.js"></script>
+  <script src="bridge-demanda.js"></script>
+
+  <!-- NOVO: bridge que grava nos dados lidos pelo ADMIN -->
+  <script src="bridge-agendamento-cidadao.js"></script>
+
+  <!-- (se tiver um "bridge-agendamento.js" antigo que conflita, remova-o) -->
+</body>
+</html>

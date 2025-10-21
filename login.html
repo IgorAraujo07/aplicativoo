@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="logo-wc.svg" />
+  <style>
+    body[data-page="login"] { display:grid; place-items:center; min-height:100vh; }
+    .card { width:min(440px, 100%); }
+    .logo { display:flex; gap:.6rem; align-items:center; font-weight:700; font-size:1.125rem; }
+    .logo-img { width:32px; height:32px; }
+    .grid { display:grid; gap:12px; }
+    .small { font-size:.9rem; color:var(--muted, #6b7280); }
+    .help { text-align:right; margin-top:-4px; }
+    .error { padding:10px; border-radius:10px; background:#fee2e2; color:#7f1d1d; border:1px solid #fecaca; }
+    .success { padding:10px; border-radius:10px; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+    .input-group { position:relative; }
+    .toggle-btn {
+      position:absolute; right:8px; top:50%; transform:translateY(-50%);
+      background:transparent; border:none; cursor:pointer; font-size:.9rem; opacity:.7;
+    }
+    .remember { display:flex; align-items:center; gap:.5rem; }
+    .sr-only { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .demo-box { background:#f3f4f6; padding:10px; font-size:.85rem; border-radius:10px; margin-top:10px; }
+    .demo-box strong { display:block; }
+  </style>
+</head>
+<body data-page="login">
+  <div class="card">
+    <div class="card-body">
+      <!-- Logo -->
+      <a href="home.html" class="logo" style="justify-content:center; text-decoration:none; color:inherit;">
+        <img src="logo-wc.svg" class="logo-img" alt="Logo WebCidadão" />
+        WebCidadão
+      </a>
+
+      <!-- Mensagens -->
+      <div id="alert" class="sr-only" aria-live="polite"></div>
+
+      <!-- Formulário -->
+      <form id="loginForm" class="grid" method="POST" novalidate>
+        <label class="small" for="perfil">Tipo de acesso</label>
+        <select id="perfil" class="input" required>
+          <option value="">Selecione o tipo de acesso</option>
+          <option value="admin">Administrador</option>
+          <option value="cidadao">Cidadão</option>
+        </select>
+
+        <label class="small" for="usuario">Usuário</label>
+        <input id="usuario" class="input" placeholder="email ou CPF" autocomplete="username" required />
+
+        <label class="small" for="senha">Senha</label>
+        <div class="input-group">
+          <input id="senha" class="input" type="password" placeholder="Sua senha" autocomplete="current-password" required minlength="4" />
+          <button type="button" id="toggleSenha" class="toggle-btn" aria-label="Mostrar senha">👁️</button>
+        </div>
+
+        <label class="remember">
+          <input type="checkbox" id="lembrar" /> Lembrar-me neste dispositivo
+        </label>
+
+        <div class="help">
+          <a href="recuperar-senha.html">Esqueceu a senha?</a>
+        </div>
+
+        <div id="loginError" class="error" style="display:none;">Usuário, senha ou perfil inválidos.</div>
+        <div id="loginOk" class="success" style="display:none;">Login realizado! Redirecionando…</div>
+
+        <button class="btn" type="submit" id="btnEntrar">Entrar</button>
+
+        <p class="small" style="text-align:center; margin:0;">
+          Ainda não tem conta?
+          <a href="cadastro.html">Cadastre-se</a>
+        </p>
+      </form>
+
+      <!-- Contas demo -->
+      <div class="demo-box">
+        <strong>Contas Demo:</strong>
+        🧑‍💼 Admin → <code>admin@demo.com</code> / <code>12345</code><br>
+        👤 Cidadão → <code>cidadao@demo.com</code> / <code>12345</code>
+      </div>
+    </div>
+  </div>
+
+ <script>
+  const MOCK = {
+    admin: { user: "admin@demo.com", pass: "12345", nome: "Administrador Demo" },
+    cidadao: { user: "cidadao@demo.com", pass: "12345", nome: "Cidadão Demo" },
+  };
+
+  const form = document.getElementById('loginForm');
+  const errorBox = document.getElementById('loginError');
+  const okBox = document.getElementById('loginOk');
+  const btn = document.getElementById('btnEntrar');
+  const perfil = document.getElementById('perfil');
+  const usuario = document.getElementById('usuario');
+  const senha = document.getElementById('senha');
+  const toggleSenha = document.getElementById('toggleSenha');
+
+  toggleSenha.addEventListener('click', () => {
+    const isPwd = senha.type === 'password';
+    senha.type = isPwd ? 'text' : 'password';
+    toggleSenha.textContent = isPwd ? '🙈' : '👁️';
+    senha.focus();
+  });
+
+  const rememberKey = 'wc.login.remember';
+  const cached = localStorage.getItem(rememberKey);
+  if (cached) {
+    try {
+      const { perfil: p, usuario: u } = JSON.parse(cached);
+      if (p) perfil.value = p;
+      if (u) usuario.value = u;
+      document.getElementById('lembrar').checked = true;
+    } catch {}
+  }
+
+  function showError(msg) {
+    errorBox.style.display = 'block';
+    errorBox.textContent = msg;
+    okBox.style.display = 'none';
+  }
+
+  function showOk(msg) {
+    okBox.style.display = 'block';
+    okBox.textContent = msg;
+    errorBox.style.display = 'none';
+  }
+
+  const AUTH_KEY = 'wc.auth';
+  function setAuth({ perfil, usuario, nome }) {
+    const nomeInferido = nome || (usuario.includes('@') ? usuario.split('@')[0] : usuario);
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ perfil, usuario, nome: nomeInferido, loginAt: Date.now() }));
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const p = perfil.value;
+    const u = usuario.value.trim();
+    const s = senha.value;
+
+    if (!p || !u || !s) {
+      showError('Preencha todos os campos.');
+      return;
+    }
+
+    let valid = false;
+    let nomeUsuario = '';
+
+    // Verifica admin
+    if (p === 'admin' && u === MOCK.admin.user && s === MOCK.admin.pass) {
+      valid = true;
+      nomeUsuario = MOCK.admin.nome;
+    }
+
+    // Verifica cidadao
+    if (p === 'cidadao') {
+      const users = JSON.parse(localStorage.getItem('wc_users') || '[]');
+      const found = users.find(user => user.email === u && atob(user.senhaHash) === s);
+      if (found) {
+        valid = true;
+        nomeUsuario = found.nome;
+      } else if (u === MOCK.cidadao.user && s === MOCK.cidadao.pass) {
+        valid = true;
+        nomeUsuario = MOCK.cidadao.nome;
+      }
+    }
+
+    if (!valid) {
+      showError('Credenciais inválidas para o perfil selecionado.');
+      return;
+    }
+
+    if (document.getElementById('lembrar').checked) {
+      localStorage.setItem(rememberKey, JSON.stringify({ perfil: p, usuario: u }));
+    } else {
+      localStorage.removeItem(rememberKey);
+    }
+
+    setAuth({ perfil: p, usuario: u, nome: nomeUsuario });
+
+    showOk('Login realizado! Redirecionando...');
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    setTimeout(() => {
+      if (p === 'admin') window.location.href = 'admin.html';
+      else window.location.href = 'cidadao.html';
+    }, 800);
+  });
+</script>
+
+</script>
+
+
+</body>
+</html>

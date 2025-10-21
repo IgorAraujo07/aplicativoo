@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recebimento de Demanda — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css"><link rel="icon" href="logo-wc.svg">
+</head>
+<body data-page="demandas">
+  <div class="topbar">
+    <div class="searchbar">
+      <strong>Recebimento de Demanda</strong>
+    </div>
+    <div class="actions"><a class="btn ghost" href="demandas.html">Voltar</a></div>
+  </div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="logo-wc.svg" class="logo-img"> WebCidadão<br><small>Administração</small></div>
+      <a href="admin.html">Painel Inicial</a>
+      <a class="active" href="demandas.html">Demandas</a>
+      <a href="relatorios.html">Relatórios</a>
+      <a href="historico.html">Histórico</a>
+      <a href="login.html">Sair</a>
+    </aside>
+    <main class="main">
+      <div class="card"><div class="card-body">
+        <h3>Novo Protocolo</h3>
+        <form class="grid grid-2" onsubmit="event.preventDefault();alert('Demanda registrada! (mock)');">
+          <div>
+            <label>Título</label>
+            <input class="input" required placeholder="Ex.: Iluminação pública queimada">
+          </div>
+          <div>
+            <label>Categoria</label>
+            <select class="input">
+              <option>Infraestrutura</option><option>Saúde</option><option>Educação</option><option>Obras</option>
+            </select>
+          </div>
+          <div>
+            <label>Prioridade</label>
+            <select class="input"><option>Baixa</option><option>Média</option><option>Alta</option></select>
+          </div>
+          <div>
+            <label>Origem</label>
+            <select class="input"><option>App</option><option>Site</option><option>Presencial</option><option>Telefone</option></select>
+          </div>
+          <div class="grid grid-2" style="grid-column:1/-1">
+            <div>
+              <label>Nome do cidadão</label>
+              <input class="input" placeholder="Nome completo">
+            </div>
+            <div>
+              <label>Contato</label>
+              <input class="input" placeholder="Telefone ou e-mail">
+            </div>
+          </div>
+          <div style="grid-column:1/-1">
+            <label>Descrição</label>
+            <textarea class="input" rows="5" placeholder="Explique a demanda..."></textarea>
+          </div>
+          <div>
+            <label>Local (bairro/rua)</label>
+            <input class="input" placeholder="Ex.: Centro / Rua A">
+          </div>
+          <div>
+            <label>Anexo (opcional)</label>
+            <input class="input" type="file">
+          </div>
+          <div style="grid-column:1/-1" class="actions">
+            <button class="btn" type="submit">Registrar</button>
+            <a class="btn ghost" href="demandas.html">Cancelar</a>
+          </div>
+        </form>
+      </div></div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="logo-wc.svg">
+  <style> html { scroll-behavior: smooth; } </style>
+</head>
+<body data-page="admin">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="logo-wc.svg" alt="WC" class="logo-img">
+        WebCidadão<br><small>Administração</small>
+      </div>
+      <a class="active" href="admin.html">Painel Inicial</a>
+      <a href="demandas.html">Demandas</a>
+      <!-- usar âncora para rolar até o bloco da mesma página -->
+      <a href="agendamentos-cidadao.html">Agendamentos (Cidadão)</a>
+      <a href="relatorios.html">Relatórios</a>
+      <a href="login.html">Sair</a>
+    </aside>
+
+    <main class="main">
+      <div class="kpis">
+        <div class="card"><div class="card-body">
+          <h3>Demandas Abertas</h3><div class="badge warning" id="kpi-abertas">0</div>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <h3>Em Andamento</h3><div class="badge info" id="kpi-andamento">0</div>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <h3>Concluídas</h3><div class="badge success" id="kpi-concluidas">0</div>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <h3>Prazo Hoje</h3><div class="badge danger" id="kpi-prazo-hoje">0</div>
+        </div></div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card"><div class="card-body">
+          <h3>Últimas Demandas</h3>
+          <div class="searchbar">
+            <input class="input" placeholder="Filtrar..." data-table-filter="#tb-demandas">
+          </div>
+          <table class="table" id="tb-demandas">
+            <thead><tr><th>Protocolo</th><th>Título</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody>
+              <tr><td>4321</td><td>Iluminação pública queimada</td><td>Infraestrutura</td><td><span class="badge warning">Aberta</span></td><td class="actions"><a class="btn ghost" href="demanda-detalhe.html">Detalhar</a></td></tr>
+              <tr><td>4318</td><td>Falta de medicamentos</td><td>Saúde</td><td><span class="badge info">Em andamento</span></td><td class="actions"><a class="btn ghost" href="demanda-detalhe.html">Detalhar</a></td></tr>
+              <tr><td>4311</td><td>Buraco em via principal</td><td>Obras</td><td><span class="badge success">Concluída</span></td><td class="actions"><a class="btn ghost" href="demanda-detalhe.html">Detalhar</a></td></tr>
+            </tbody>
+          </table>
+        </div></div>
+
+        <!-- ===== Agendamentos (Cidadão) ===== -->
+        <div class="card" id="agendamentos-cidadao"><div class="card-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+            <h3 style="margin:0;">Agendamentos (Cidadão)</h3>
+            <div class="badge info" id="kpi-ag-admin">0</div>
+          </div>
+
+          <div class="searchbar" style="margin-top:12px;">
+            <input class="input" placeholder="Filtrar..." data-table-filter="#tb-agendamentos">
+          </div>
+
+          <table class="table" id="tb-agendamentos">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Usuário</th>
+                <th>Serviço</th>
+                <th>Data</th>
+                <th>Hora</th>
+                <th>Obs.</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div></div>
+        <!-- ===== FIM ===== -->
+      </div>
+
+      <footer>© WebCidadão — Painel Admin</footer>
+    </main>
+  </div>
+
+  <script src="app.js" defer></script>
+  <script src="bridge-demanda.js" defer></script>
+  <script src="bridge-agendamento-admin.js" defer></script>
+
+  <!-- KPIs dinâmicos (mantidos) -->
+  <script>
+    (function () {
+      const idEl = (id) => document.getElementById(id);
+      const norm = (s) => (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+      function getDemandasFromStorage() {
+        try {
+          const arr = JSON.parse(localStorage.getItem('wc.demandas') || 'null');
+          if (Array.isArray(arr)) return arr;
+        } catch {}
+        const out = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key) continue;
+          if (key.startsWith('wc.demandas.') || key.startsWith('wc.demanda.')) {
+            try {
+              const val = JSON.parse(localStorage.getItem(key) || 'null');
+              if (Array.isArray(val)) out.push(...val);
+              else if (val && typeof val === 'object') out.push(val);
+            } catch {}
+          }
+        }
+        return out;
+      }
+
+      function getDemandasFromTable() {
+        const rows = Array.from(document.querySelectorAll('#tb-demandas tbody tr'));
+        return rows.map(tr => {
+          const tds = tr.querySelectorAll('td');
+          const statusText = tds[3]?.innerText || '';
+          return { status: statusText };
+        });
+      }
+
+      function parsePrazo(prazo) {
+        if (!prazo) return null;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(prazo)) {
+          const [y,m,d] = prazo.split('-').map(Number);
+          return new Date(y, m-1, d);
+        }
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(prazo)) {
+          const [d,m,y] = prazo.split('/').map(Number);
+          return new Date(y, m-1, d);
+        }
+        const dt = new Date(prazo);
+        return isNaN(dt.getTime()) ? null : dt;
+      }
+
+      function computeKpis() {
+        let demandas = getDemandasFromStorage();
+        if (!demandas.length) demandas = getDemandasFromTable();
+
+        let abertas = 0, andamento = 0, concluidas = 0, prazoHoje = 0;
+        const hoje = new Date(); const Y = hoje.getFullYear(), M = hoje.getMonth(), D = hoje.getDate();
+
+        demandas.forEach(d => {
+          const st = norm(d.status || d.situacao || '');
+          if (st.includes('conclu'))      concluidas++;
+          else if (st.includes('andament')) andamento++;
+          else if (st.includes('abert'))   abertas++;
+
+          const p = parsePrazo(d.prazo || d.dataPrazo || d.deadline);
+          if (p && p.getFullYear()===Y && p.getMonth()===M && p.getDate()===D) prazoHoje++;
+        });
+
+        idEl('kpi-abertas').textContent   = abertas;
+        idEl('kpi-andamento').textContent = andamento;
+        idEl('kpi-concluidas').textContent= concluidas;
+        idEl('kpi-prazo-hoje').textContent= prazoHoje;
+      }
+
+      document.addEventListener('DOMContentLoaded', computeKpis);
+      window.addEventListener('storage', computeKpis);
+    })();
+  </script>
+
+  <script>
+    document.querySelectorAll('.sidebar a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        const id = a.getAttribute('href').substring(1);
+        const target = document.getElementById(id);
+        if(target){
+          e.preventDefault();
+          target.scrollIntoView({behavior:'smooth', block:'start'});
+          document.querySelectorAll('.sidebar a').forEach(x=>x.classList.remove('active'));
+          a.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

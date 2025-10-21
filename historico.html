@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Histórico — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="logo-wc.svg">
+  <style>
+    html { scroll-behavior: smooth; }
+    .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .spacer { flex:1; }
+    .hist-dia { margin: 8px 0 4px; color: var(--muted, #667085); font-size: 0.9rem; }
+    .hist-list { list-style: none; padding-left: 0; margin: 0 0 16px; }
+    .hist-item { padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,.06); display:flex; gap:12px; align-items:flex-start;}
+    .hist-hora { min-width: 64px; font-variant-numeric: tabular-nums; opacity: .7; }
+    .hist-msg  { flex: 1; }
+    .hist-meta { font-size: .85rem; opacity:.85; }
+    .hist-badge{ font-size:.7rem; padding:.15rem .4rem; border-radius:999px; background: #eef2ff; }
+    .kpis{display:grid;gap:12px;grid-template-columns:repeat(4,minmax(120px,1fr));margin-top:12px}
+    .kpi{background:#fff;border-radius:var(--radius,16px);box-shadow:var(--shadow,0 6px 20px rgba(0,0,0,.08));padding:14px}
+    .kpi strong{display:block;font-size:1.15rem}
+    .filters{display:grid;gap:10px;grid-template-columns:repeat(6,minmax(120px,1fr))}
+    .filters .wide{grid-column:span 2}
+    .filters .full{grid-column:1 / -1}
+    @media (max-width:900px){
+      .kpis{grid-template-columns:repeat(2,minmax(120px,1fr))}
+      .filters{grid-template-columns:repeat(2,minmax(120px,1fr))}
+    }
+  </style>
+</head>
+<body data-page="historico">
+  <div class="topbar">
+    <div class="searchbar">
+      <strong>Histórico</strong>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="logo-wc.svg" class="logo-img" alt="Logomarca">
+        WebCidadão<br><small>Administração</small>
+      </div>
+      <a href="admin.html">Painel Inicial</a>
+      <a href="demandas.html">Demandas</a>
+      <a href="transparencia.html">Transparência</a>
+      <a href="admin.html#agendamentos-cidadao">Agendamentos (Cidadão)</a>
+      <a href="relatorios.html">Relatórios</a>
+      <a class="active" href="historico.html">Histórico</a>
+      <a href="login.html">Sair</a>
+    </aside>
+
+    <main class="main" role="main">
+      <div class="card"><div class="card-body">
+        <div class="row">
+          <h3 style="margin:0;">Eventos do Sistema</h3>
+          <span id="hist-total" class="hist-badge">0</span>
+          <div class="spacer"></div>
+          <div class="actions">
+            <button id="hist-export-csv" class="btn">CSV</button>
+            <button id="hist-export-pdf" class="btn secondary">PDF</button>
+            <button id="hist-recarregar" class="btn ghost">Recarregar</button>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters" style="margin-top:12px">
+          <div>
+            <label class="small muted">De</label>
+            <input id="hist-de" type="date" class="input">
+          </div>
+          <div>
+            <label class="small muted">Até</label>
+            <input id="hist-ate" type="date" class="input">
+          </div>
+          <div>
+            <label class="small muted">Tipo</label>
+            <select id="hist-tipo" class="input">
+              <option value="">Todos</option>
+              <option value="demanda.criada">demanda.criada</option>
+              <option value="demanda.status">demanda.status</option>
+              <option value="agendamento">agendamento</option>
+              <option value="auth">auth</option>
+              <option value="evento">evento</option>
+            </select>
+          </div>
+          <div>
+            <label class="small muted">Usuário</label>
+            <select id="hist-user" class="input">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="wide">
+            <label class="small muted">Buscar texto</label>
+            <input id="hist-busca" class="input" placeholder="Filtrar por texto, usuário ou tipo...">
+          </div>
+          <div class="full" style="display:flex;gap:8px;align-items:end">
+            <button id="hist-aplicar" class="btn">Aplicar</button>
+            <button id="hist-limparfiltros" class="btn ghost">Limpar filtros</button>
+            <div class="spacer"></div>
+            <button id="hist-limpar" class="btn outline" title="Apaga apenas a chave principal wc.historico">Limpar histórico (principal)</button>
+            <button id="hist-limpar-tudo" class="btn danger" title="Apaga todas as chaves de histórico">Limpar TUDO o histórico</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpis" id="hist-kpis"></div>
+
+        <!-- Lista -->
+        <div id="hist-container" style="margin-top:12px"></div>
+      </div></div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

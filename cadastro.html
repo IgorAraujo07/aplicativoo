@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Criar conta — WebCidadão</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="logo-wc.svg">
+</head>
+<body>
+  <header class="topbar">
+    <a href="home.html" class="logo" style="justify-content:center;text-decoration:none;color:inherit;">
+      <img src="logo-wc.svg" class="logo-img" alt="Logo WebCidadão">
+      WebCidadão
+    </a>
+    <nav class="nav">
+      <a href="home.html">Início</a>
+      <a href="servicos.html">Serviços</a>
+      <a href="como-funciona.html">Como funciona</a>
+      <a class="btn outline" href="login.html">Entrar</a>
+      <a class="btn primary" href="cadastro.html">Cadastrar</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <form class="form" onsubmit="return handleSignup(event)">
+      <h1>Criar conta</h1>
+      <p class="small">Preencha os dados para acessar o Portal do Cidadão</p>
+
+      <label class="label" for="nome">Nome completo</label>
+      <input id="nome" class="input" placeholder="Seu nome" required>
+
+      <label class="label" for="email">E-mail</label>
+      <input id="email" type="email" class="input" placeholder="voce@email.com" required>
+
+      <label class="label" for="senha">Senha</label>
+      <input id="senha" type="password" minlength="6" class="input" placeholder="Mínimo de 6 caracteres" required>
+      <div class="hr"></div>
+
+      <label class="label" for="confirm">Confirmar senha</label>
+      <input id="confirm" type="password" class="input" placeholder="Repita a senha" required>
+
+      <!-- ===== ADIÇÃO: Tipo de conta / Administrador ===== -->
+      <div class="hr"></div>
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend class="label" style="margin-bottom:8px;">Tipo de conta</legend>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+          <label style="display:flex;gap:8px;align-items:center">
+            <input type="radio" name="perfil" value="cidadao" checked>
+            <span>Cidadão</span>
+          </label>
+          <label style="display:flex;gap:8px;align-items:center">
+            <input type="radio" name="perfil" value="admin" id="perfil-admin">
+            <span>Administrador</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Campo de código do administrador (aparece somente se Administrador for selecionado) -->
+      <div id="adm-key-wrap" class="hide" style="margin-top:12px">
+        <label class="label" for="adm-key">Código de administrador</label>
+        <input id="adm-key" class="input" placeholder="Digite o código fornecido pela Prefeitura">
+        <p class="small muted">Somente para criação de contas administrativas.</p>
+      </div>
+      <!-- ===== FIM DA ADIÇÃO ===== -->
+
+      <div class="actions" style="margin-top:16px">
+        <button class="btn primary" type="submit">Criar conta</button>
+      </div>
+      <p class="small">Ao criar conta, você concorda com nossos termos de uso.</p>
+    </form>
+  </div>
+
+  <script>
+  // ===== ADIÇÃO: mostrar/ocultar campo de código quando escolher "Administrador"
+  (function(){
+    const adminRadio = document.getElementById('perfil-admin');
+    const wrap = document.getElementById('adm-key-wrap');
+    document.querySelectorAll('input[name="perfil"]').forEach(r => {
+      r.addEventListener('change', () => {
+        if (adminRadio.checked) { wrap.classList.remove('hide'); }
+        else { wrap.classList.add('hide'); }
+      });
+    });
+  })();
+  // ===== FIM ADIÇÃO =====
+
+  function handleSignup(e){
+    e.preventDefault();
+
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
+    const confirm = document.getElementById('confirm').value;
+
+    // ===== ADIÇÃO: ler perfil e validar código de admin =====
+    const perfil = (document.querySelector('input[name="perfil"]:checked') || {}).value || 'cidadao';
+
+    // Código de administrador de exemplo — troque por um valor seguro
+    const ADMIN_CODE = 'WC-ADMIN-2025';
+
+    if (perfil === 'admin') {
+      const admKey = (document.getElementById('adm-key').value || '').trim();
+      if (!admKey || admKey !== ADMIN_CODE) {
+        alert('Código de administrador inválido.');
+        return false;
+      }
+    }
+    // ===== FIM ADIÇÃO =====
+
+    if(senha !== confirm){
+      alert('As senhas não coincidem.');
+      return false;
+    }
+
+    const users = JSON.parse(localStorage.getItem('wc_users')||'[]');
+    if(users.some(u=>u.email===email)){
+      alert('Já existe uma conta com este e-mail.');
+      return false;
+    }
+
+    // Mantém seu formato + adiciona 'perfil' (compatível com existentes)
+    users.push({
+      nome,
+      email,
+      senhaHash: btoa(senha),
+      perfil: perfil,                  // <<=== ADIÇÃO
+      createdAt: new Date().toISOString()
+    });
+
+    localStorage.setItem('wc_users', JSON.stringify(users));
+
+    // Mantém sua chave atual, apenas incluindo perfil
+    localStorage.setItem('wc_current_user', JSON.stringify({nome, email, perfil}));
+
+    alert('Conta criada com sucesso!');
+
+    // Mantém seu comportamento original e só redireciona para admin se for administrador
+    if (perfil === 'admin') {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = 'home.html';
+    }
+    return false;
+  }
+  </script>
+
+  <footer class="footer">© 2025 WebCidadão</footer>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Portal do Cidadão — serviços municipais de demandas da população." />
+  <title>WebCidadão — Portal do Cidadão</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="logo-wc.svg" />
+</head>
+<body data-page="home" id="top">
+  
+
+  <header class="topbar" role="banner">
+    <a href="home.html" class="brand" style="text-decoration: none;">
+  <img src="logo-wc.svg" alt="Logo WebCidadão" class="logo-img">
+  <span>WebCidadão</span>
+</a>
+
+
+    <nav class="nav" aria-label="Navegação principal">
+      <!-- Se esta página for index.html, pode manter href="index.html" -->
+      <a href="home.html">Início</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#como">Como funciona</a>
+      <a href="login.html" class="btn" rel="nofollow">Entrar</a>
+      <a href="cadastro.html" class="btn" rel="nofollow">Cadastrar</a>
+    </nav>
+  </header>
+
+  <main id="conteudo">
+    <section class="hero" aria-labelledby="titulo-hero">
+      <div class="container">
+        <div>
+          <h1 id="titulo-hero">Acesse os serviços municipais de forma rápida e fácil</h1>
+          <p>Bem-vindo ao Sistema de Gestão Comunitária. Nosso projeto aproxima cidadãos, prefeituras, ONGs e empresas.</p>
+          <div class="cta" role="group" aria-label="Ações principais">
+            <!-- Se já tiver portal/dash, aponte para portal.html -->
+            <a id="ctaGo" class="btn primary" href="portal.html">Acessar Portal</a>
+            <a class="btn secondary" href="#servicos">Saiba Mais</a>
+          </div>
+        </div>
+
+        <aside class="card" aria-label="Destaques do atendimento digital">
+          <h2 class="section-title">Atendimento 100% Digital</h2>
+          <ul>
+            <li>Disponível 24/7</li>
+            <li>Seguro e confiável</li>
+            <li>Acompanhamento em tempo real</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="container" id="servicos" aria-labelledby="titulo-servicos">
+      <h2 class="section-title" id="titulo-servicos">Serviços mais utilizados</h2>
+
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+        <article class="card" aria-labelledby="svc-agendamento">
+          <h3 id="svc-agendamento"><strong>Agendamento</strong></h3>
+          <p>Agende atendimentos presenciais na prefeitura.</p>
+        </article>
+
+        <article class="card" aria-labelledby="svc-demandas">
+          <h3 id="svc-demandas"><strong>Demandas</strong></h3>
+          <p>Envie solicitações e acompanhe o status.</p>
+        </article>
+
+        <article class="card" aria-labelledby="svc-transparencia">
+          <h3 id=" svc-transparencia"><strong>Transparência</strong></h3>
+          <p> Será Respondido em poucos dias.</p>
+        </article>
+      </div>
+
+      <h2 class="section-title" id="como" style="margin-top:1.5rem">Como funciona</h2>
+      <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="card" aria-label="Passo 1">
+          <strong>1. Cadastre-se</strong><br />
+          <small>E-mail e senha.</small>
+        </div>
+        <div class="card" aria-label="Passo 2">
+          <strong>2. Escolha o serviço</strong><br />
+          <small>Demandas, relatórios.</small>
+        </div>
+        <div class="card" aria-label="Passo 3">
+          <strong>3. Acompanhe</strong><br />
+          <small>Receba notificações e atualizações.</small>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    © 2025 WebCidadão <a href="#top"></a>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Opcional: se existir usuário logado no localStorage, CTA vai direto ao portal
+    (function () {
+      try {
+        const user = JSON.parse(localStorage.getItem('wc_current_user') || 'null');
+        const cta = document.getElementById('ctaGo');
+        if (user && cta) cta.setAttribute('href', 'portal.html');
+      } catch (_) {}
+    })();
+  </script>
+</body>
+</html>
+
